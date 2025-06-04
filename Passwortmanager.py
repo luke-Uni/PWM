@@ -89,13 +89,15 @@ class Nutzerdaten ():
         
         erstellungsdatum = datetime.now()
         if self.pruefe_einagbe():
-        #mit modus ab die daten in Bytes, der Datei hinzufügen
-            f = open('nutzer_info.txt', 'ab')
-            f.write(verschluesseln(self.title + " " + self.username + " " + self.code + " " + str(erstellungsdatum)))
-            f.close
-            f = open('nutzer_info.txt', 'a')
-            f.write("\n")
-            f.close()
+            # mit Modus 'ab' die Daten verschlüsselt in die Datei anhängen
+            with open('nutzer_info.txt', 'ab') as f:
+                f.write(
+                    verschluesseln(
+                        self.title + " " + self.username + " " + self.code + " " + str(erstellungsdatum)
+                    )
+                )
+            with open('nutzer_info.txt', 'a') as f:
+                f.write("\n")
         
     #gibt die ganze Datei farbig mit den Nutzerdaten als Tabelle aus
     def ganze_Liste_ausgeben(self):
@@ -239,34 +241,44 @@ def verdecken(pw):
 
 # prüft ob der übergebene Titel in der Userdatendatei existiert
 def exist(titel):
-    f = open("nutzer_info.txt", "rb")
-    lines = f.readlines()
-    f.close()
-    f = open("nutzer_info.txt", "r")
+    """Prüft, ob der angegebene Titel bereits gespeichert ist."""
+    with open("nutzer_info.txt", "rb") as f:
+        lines = f.readlines()
+
     for bit_line in lines:
         line = entschluesseln(bit_line)
         userdaten = line.split(" ")
-        if titel.lower() == str(userdaten[0]).lower():
-            f.close()
+        if titel.lower() == userdaten[0].lower():
             return True
     return False
 
 #gibt den eingegbenen titel mit titel, username und Passwort zurück
 def nutzerdatei_finden():
     titel = input("Welchen Titel wollen Sie ansehen: ")
-    f = open("nutzer_info.txt", "rb")
-    if(exist(titel)):
-        lines = f.readlines()
-        f.close()
-        f = open("nutzer_info.txt", "r")
+    if exist(titel):
+        with open("nutzer_info.txt", "rb") as f:
+            lines = f.readlines()
+
         for bit_line in lines:
             line = entschluesseln(bit_line)
             userdaten = line.split(" ")
             if titel == userdaten[0]:
-                print(Fore.LIGHTYELLOW_EX + userdaten[0] + Fore.RESET +  " " + Fore.LIGHTGREEN_EX + userdaten[1] + Fore.RESET + " " + Fore.LIGHTRED_EX + verdecken(userdaten[2]) + Fore.RESET)
+                print(
+                    Fore.LIGHTYELLOW_EX
+                    + userdaten[0]
+                    + Fore.RESET
+                    + " "
+                    + Fore.LIGHTGREEN_EX
+                    + userdaten[1]
+                    + Fore.RESET
+                    + " "
+                    + Fore.LIGHTRED_EX
+                    + verdecken(userdaten[2])
+                    + Fore.RESET
+                )
                 zwischenablage_speichern(userdaten[2])
     else:
-        print("Titel ist nicht vorhanden.")                    
+        print("Titel ist nicht vorhanden.")
 
 # der eingegebene titel soll aus der Nutzerdatendatei gelöscht werden
 def nutzerdatei_loeschen():
